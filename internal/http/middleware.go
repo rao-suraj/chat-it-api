@@ -1,15 +1,16 @@
 package http
 
 import (
+	"chat-it-api/internal/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"log/slog"
-
-	"chat-it-api/internal/logger"
+	"time"
 )
 
 func RequestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		start := time.Now()
 		reqID := uuid.NewString()
 
 		log := logger.L().With(
@@ -25,6 +26,7 @@ func RequestLogger() gin.HandlerFunc {
 
 		log.Info("http_request_completed",
 			slog.Int("status", c.Writer.Status()),
+			slog.Int64("duration_ms", time.Since(start).Milliseconds()),
 		)
 	}
 }
