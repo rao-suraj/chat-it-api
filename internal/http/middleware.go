@@ -1,11 +1,15 @@
 package http
 
 import (
+	"chat-it-api/internal/errors"
 	"chat-it-api/internal/logger"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"log/slog"
-	"time"
 )
 
 func RequestLogger() gin.HandlerFunc {
@@ -29,4 +33,61 @@ func RequestLogger() gin.HandlerFunc {
 			slog.Int64("duration_ms", time.Since(start).Milliseconds()),
 		)
 	}
+}
+
+func ErrorHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+
+		if len(c.Errors) == 0 {
+			return
+		}
+
+		err := c.Errors.Last().Err
+		log := logger.FromContext(c.Request.Context())
+
+		appErr, ok := err.(*errors.AppError)
+		if !ok {
+			// unexpected error — log with stack trace
+			log.Error("unexpected error",
+				slog.String("error", err.Error()),
+				slog.String("stack", fmt.Sprintf("%+v", err)),
+			)
+			appErr = errors.Internal()
+		} else if appErr.Status >= 500 {
+			log.Error("internal app error",
+				slog.String("code", appErr.Code),
+				slog.String("error", appErr.Message),
+				slog.String("stack", fmt.Sprintf("%+v", err)),
+			)
+		} else {
+			// expected client errors — no stack needed
+			log.Warn("client error",
+				slog.String("code", appErr.Code),
+				slog.String("error", appErr.Message),
+			)
+		}
+
+		c.JSON(appErr.Status, gin.H{
+			"error": gin.H{
+				"code":    appErr.Code,
+				"message": appErr.Message,
+			},
+		})
+	}
+}
+
+func Recovery() gin.HandlerFunc {
+	return gin.RecoveryWithWriter(gin.DefaultErrorWriter, func(c *gin.Context, err any) {
+		log := logger.FromContext(c.Request.Context())
+		log.Error("panic recovered",
+			slog.String("error", fmt.Sprintf("%v", err)),
+		)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": gin.H{
+				"code":    "INTERNAL_ERROR",
+				"message": "something went wrong",
+			},
+		})
+	})
 }

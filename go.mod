@@ -7,6 +7,8 @@ require (
 	github.com/google/uuid v1.6.0
 )
 
+require github.com/pkg/errors v0.9.1 // indirect
+
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
