@@ -2,7 +2,7 @@ package v1
 
 import (
 	"chat-it-api/internal/errors"
-	"net/http"
+	"chat-it-api/internal/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,5 +27,5 @@ func chat(c *gin.Context) {
 	}
 
 	// call service here later
-	c.JSON(http.StatusOK, gin.H{"reply": "received: " + req.Message})
+	response.OK(c, gin.H{"reply": "received: " + req.Message})
 }

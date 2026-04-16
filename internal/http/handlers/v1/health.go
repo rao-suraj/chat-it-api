@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"net/http"
+	"chat-it-api/internal/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,5 +11,5 @@ func RegisterHealthRoutes(r *gin.RouterGroup) {
 }
 
 func health(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	response.OK(c, gin.H{"status": "ok"})
 }

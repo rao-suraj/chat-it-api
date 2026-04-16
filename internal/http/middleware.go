@@ -15,7 +15,7 @@ import (
 func RequestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		reqID := uuid.NewString()
+		reqID := "req_" + uuid.NewString()
 
 		log := logger.L().With(
 			slog.String("request_id", reqID),
@@ -69,6 +69,7 @@ func ErrorHandler() gin.HandlerFunc {
 		}
 
 		c.JSON(appErr.Status, gin.H{
+			"request_id": c.GetString("request_id"),
 			"error": gin.H{
 				"code":    appErr.Code,
 				"message": appErr.Message,
@@ -84,6 +85,7 @@ func Recovery() gin.HandlerFunc {
 			slog.String("error", fmt.Sprintf("%v", err)),
 		)
 		c.JSON(http.StatusInternalServerError, gin.H{
+			"request_id": c.GetString("request_id"),
 			"error": gin.H{
 				"code":    "INTERNAL_ERROR",
 				"message": "something went wrong",
