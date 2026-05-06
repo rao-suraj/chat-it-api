@@ -1,0 +1,238 @@
+{
+  "metadata": {
+    "version": "v1",
+    "domain": "appointment_booking_salon",
+    "today_assumed": "2026-04-30",
+    "notes": "Today is Thursday 2026-04-30. Tomorrow=2026-05-01 (Fri). Monday=2026-05-04. Run with --today=2026-04-30 to keep expected dates aligned."
+  },
+  "cases": [
+    {
+      "id": "tc_book_001_full",
+      "input": "I'd like to book a haircut for tomorrow at 3pm",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "check_availability", "args": { "service": "haircut", "date": "2026-05-01", "time": "15:00" } }
+      }
+    },
+    {
+      "id": "tc_book_002_normalize_service",
+      "input": "Book me a dental cleaning on May 5th at 10am",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "check_availability", "args": { "service": "dental_cleaning", "date": "2026-05-05", "time": "10:00" } }
+      }
+    },
+    {
+      "id": "tc_book_003_relative_day",
+      "input": "I want a massage on Monday at 2pm",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "check_availability", "args": { "service": "massage", "date": "2026-05-04", "time": "14:00" } }
+      }
+    },
+    {
+      "id": "tc_book_004_specific_date",
+      "input": "Book a facial for May 8 at 11:30am",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "check_availability", "args": { "service": "facial", "date": "2026-05-08", "time": "11:30" } }
+      }
+    },
+    {
+      "id": "tc_book_005_noon",
+      "input": "I'd like a manicure tomorrow at noon",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "check_availability", "args": { "service": "manicure", "date": "2026-05-01", "time": "12:00" } }
+      }
+    },
+    {
+      "id": "tc_book_006_with_contact",
+      "input": "Hi, I'm Priya Sharma, my number is 9876543210. I'd like a haircut on May 3 at 4pm.",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "create_appointment", "args": { "service": "haircut", "date": "2026-05-03", "time": "16:00", "customer_name": "Priya Sharma", "customer_phone": "9876543210" } }
+      }
+    },
+    {
+      "id": "tc_book_007_with_contact_pedicure",
+      "input": "Book me (Rahul Kumar, 9123456789) a pedicure for tomorrow at 5pm",
+      "expected": {
+        "intent": "book_appointment",
+        "tool_call": { "name": "create_appointment", "args": { "service": "pedicure", "date": "2026-05-01", "time": "17:00", "customer_name": "Rahul Kumar", "customer_phone": "9123456789" } }
+      }
+    },
+    {
+      "id": "tc_book_008_no_slots",
+      "input": "I want to book an appointment",
+      "expected": { "intent": "book_appointment", "tool_call": null, "notes": "all slots missing — should ask clarifying question" }
+    },
+    {
+      "id": "tc_book_009_missing_time",
+      "input": "Can I get a haircut tomorrow?",
+      "expected": { "intent": "book_appointment", "tool_call": null, "notes": "time missing — should ask" }
+    },
+    {
+      "id": "tc_book_010_no_service",
+      "input": "Book me a massage",
+      "expected": { "intent": "book_appointment", "tool_call": null, "notes": "date+time missing" }
+    },
+    {
+      "id": "tc_book_011_vague",
+      "input": "I need to schedule something for next week",
+      "expected": { "intent": "book_appointment", "tool_call": null, "notes": "service+specific time missing" }
+    },
+    {
+      "id": "tc_resch_001_full",
+      "input": "Reschedule appointment APT12345 to May 10 at 11am",
+      "expected": {
+        "intent": "reschedule_appointment",
+        "tool_call": { "name": "reschedule_appointment", "args": { "appointment_id": "APT12345", "new_date": "2026-05-10", "new_time": "11:00" } }
+      }
+    },
+    {
+      "id": "tc_resch_002_full_id_format",
+      "input": "Move my booking ABC789 to tomorrow at 2pm",
+      "expected": {
+        "intent": "reschedule_appointment",
+        "tool_call": { "name": "reschedule_appointment", "args": { "appointment_id": "ABC789", "new_date": "2026-05-01", "new_time": "14:00" } }
+      }
+    },
+    {
+      "id": "tc_resch_003_vague",
+      "input": "I need to change my appointment to later",
+      "expected": { "intent": "reschedule_appointment", "tool_call": null, "notes": "no ID, no specific time" }
+    },
+    {
+      "id": "tc_resch_004_no_id",
+      "input": "Reschedule my appointment to Friday at 3pm",
+      "expected": { "intent": "reschedule_appointment", "tool_call": null, "notes": "no appointment ID" }
+    },
+    {
+      "id": "tc_cancel_001",
+      "input": "Cancel appointment APT99999",
+      "expected": {
+        "intent": "cancel_appointment",
+        "tool_call": { "name": "cancel_appointment", "args": { "appointment_id": "APT99999" } }
+      }
+    },
+    {
+      "id": "tc_cancel_002_id_with_dash",
+      "input": "Please cancel my booking BK-7777",
+      "expected": {
+        "intent": "cancel_appointment",
+        "tool_call": { "name": "cancel_appointment", "args": { "appointment_id": "BK-7777" } }
+      }
+    },
+    {
+      "id": "tc_cancel_003_no_id",
+      "input": "I want to cancel my appointment",
+      "expected": { "intent": "cancel_appointment", "tool_call": null, "notes": "no ID" }
+    },
+    {
+      "id": "tc_avail_001_partial",
+      "input": "Are there any haircut slots tomorrow?",
+      "expected": {
+        "intent": "check_availability",
+        "tool_call": { "name": "check_availability", "args": { "service": "haircut", "date": "2026-05-01", "time": "" } }
+      }
+    },
+    {
+      "id": "tc_avail_002_full",
+      "input": "Do you have massage openings on May 6 at 2pm?",
+      "expected": {
+        "intent": "check_availability",
+        "tool_call": { "name": "check_availability", "args": { "service": "massage", "date": "2026-05-06", "time": "14:00" } }
+      }
+    },
+    {
+      "id": "tc_avail_003_open",
+      "input": "When can I get a facial?",
+      "expected": {
+        "intent": "check_availability",
+        "tool_call": { "name": "check_availability", "args": { "service": "facial", "date": "", "time": "" } }
+      }
+    },
+    {
+      "id": "tc_status_001",
+      "input": "What's the status of appointment APT55555?",
+      "expected": {
+        "intent": "check_status",
+        "tool_call": { "name": "get_appointment_status", "args": { "appointment_id": "APT55555" } }
+      }
+    },
+    {
+      "id": "tc_status_002",
+      "input": "Is my booking BK1234 confirmed?",
+      "expected": {
+        "intent": "check_status",
+        "tool_call": { "name": "get_appointment_status", "args": { "appointment_id": "BK1234" } }
+      }
+    },
+    {
+      "id": "tc_status_003_no_id",
+      "input": "Is my appointment confirmed?",
+      "expected": { "intent": "check_status", "tool_call": null, "notes": "no ID" }
+    },
+    {
+      "id": "tc_list_001",
+      "input": "What services do you offer?",
+      "expected": { "intent": "list_services", "tool_call": { "name": "list_services", "args": {} } }
+    },
+    {
+      "id": "tc_list_002",
+      "input": "Tell me what you have",
+      "expected": { "intent": "list_services", "tool_call": { "name": "list_services", "args": {} } }
+    },
+    {
+      "id": "tc_pricing_001_specific",
+      "input": "How much is a haircut?",
+      "expected": { "intent": "ask_pricing", "tool_call": { "name": "get_pricing", "args": { "service": "haircut" } } }
+    },
+    {
+      "id": "tc_pricing_002_all",
+      "input": "What are your prices?",
+      "expected": { "intent": "ask_pricing", "tool_call": { "name": "get_pricing", "args": { "service": "" } } }
+    },
+    {
+      "id": "tc_pricing_003_normalize",
+      "input": "Cost of dental cleaning?",
+      "expected": { "intent": "ask_pricing", "tool_call": { "name": "get_pricing", "args": { "service": "dental_cleaning" } } }
+    },
+    {
+      "id": "tc_info_001_hours",
+      "input": "What time do you open?",
+      "expected": { "intent": "ask_business_info", "tool_call": { "name": "get_business_info", "args": { "field": "hours" } } }
+    },
+    {
+      "id": "tc_info_002_location",
+      "input": "Where are you located?",
+      "expected": { "intent": "ask_business_info", "tool_call": { "name": "get_business_info", "args": { "field": "location" } } }
+    },
+    {
+      "id": "tc_info_003_contact",
+      "input": "What's your phone number?",
+      "expected": { "intent": "ask_business_info", "tool_call": { "name": "get_business_info", "args": { "field": "contact" } } }
+    },
+    {
+      "id": "tc_greet_001",
+      "input": "Hello!",
+      "expected": { "intent": "greeting", "tool_call": null }
+    },
+    {
+      "id": "tc_bye_001",
+      "input": "Thanks, bye!",
+      "expected": { "intent": "goodbye", "tool_call": null }
+    },
+    {
+      "id": "tc_oos_001_weather",
+      "input": "What's the weather today?",
+      "expected": { "intent": "out_of_scope", "tool_call": null }
+    },
+    {
+      "id": "tc_oos_002_joke",
+      "input": "Tell me a joke",
+      "expected": { "intent": "out_of_scope", "tool_call": null }
+    }
+  ]
+}

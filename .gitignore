@@ -5,6 +5,10 @@
 # Build output
 /bin/
 /dist/
+/bench
+
+# Benchmark output
+cmd/bench/results.json
 
 # Go
 *.exe
